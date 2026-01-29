@@ -45,7 +45,7 @@ export function SearchForm({ currentSearch }: SearchFormProps) {
         </svg>
       </form>
       <p className="mt-1.5 text-xs text-gray-500 hidden sm:block">
-        Search by title, project, or author
+        Search by title or project
       </p>
     </div>
   )
