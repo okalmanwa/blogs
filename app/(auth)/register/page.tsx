@@ -94,7 +94,7 @@ export default function RegisterPage() {
           .from('profiles')
           .select('id, role')
           .eq('id', authData.user.id)
-          .single()
+          .single() as { data: { id: string; role: string } | null }
 
         // If profile doesn't exist, create it automatically
         if (!existingProfile) {
@@ -121,7 +121,7 @@ export default function RegisterPage() {
               .from('profiles')
               .select('id, role')
               .eq('id', authData.user.id)
-              .single()
+              .single() as { data: { id: string; role: string } | null }
             
             if (!retryProfile) {
               setError(`Failed to create profile: ${profileError.message}. Please contact support.`)

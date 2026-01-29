@@ -20,7 +20,7 @@ export default async function BlogPostPage({
     .select('*, author:profiles(*), project:projects(*)')
     .eq('slug', params.slug)
     .eq('status', 'published')
-    .single()
+    .single() as { data: any | null }
 
   if (!post) {
     notFound()
@@ -52,8 +52,8 @@ export default async function BlogPostPage({
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
-    isAdmin = profile?.role === 'admin'
+      .single() as { data: { role: string } | null }
+    isAdmin = (profile as { role?: string } | null)?.role === 'admin'
   } else if (hardcodedUser) {
     currentUserId = hardcodedUser.id
     isAdmin = hardcodedUser.role === 'admin'

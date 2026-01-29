@@ -33,7 +33,7 @@ export default async function NewPostPage() {
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .single()
+        .single() as { data: { role: string } | null }
       
       // If profile exists, check role
       // If profile doesn't exist, allow access (default to student)

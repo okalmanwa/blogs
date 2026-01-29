@@ -37,8 +37,8 @@ export default async function DashboardLayout({
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
-    userRole = profile?.role || 'student'
+      .single() as { data: { role: string } | null }
+    userRole = (profile as { role?: string } | null)?.role || 'student'
   }
 
   const isAdmin = userRole === 'admin'

@@ -38,13 +38,14 @@ export async function GET(request: NextRequest) {
           .from('profiles')
           .select('role')
           .eq('id', user.id)
-          .single()
+          .single() as { data: { role: string } | null }
 
         // Determine redirect path based on role
         let redirectPath = '/'
-        if (profile?.role === 'admin') {
+        const profileRole = (profile as { role?: string } | null)?.role
+        if (profileRole === 'admin') {
           redirectPath = '/admin/dashboard'
-        } else if (profile?.role === 'student') {
+        } else if (profileRole === 'student') {
           redirectPath = '/student/dashboard'
         }
 

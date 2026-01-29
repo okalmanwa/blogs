@@ -85,9 +85,10 @@ export default function LoginPage() {
 
         // Determine redirect path based on role
         let redirectPath = '/'
-        if (profile?.role === 'admin' || hardcodedUser.role === 'admin') {
+        const profileRole = profile ? (profile as { role: string }).role : null
+        if (profileRole === 'admin' || hardcodedUser.role === 'admin') {
           redirectPath = '/admin/dashboard'
-        } else if (profile?.role === 'student' || hardcodedUser.role === 'student') {
+        } else if (profileRole === 'student' || hardcodedUser.role === 'student') {
           redirectPath = '/student/dashboard'
         }
 
@@ -148,7 +149,7 @@ export default function LoginPage() {
           .from('profiles')
           .select('id, role')
           .eq('id', authData.user.id)
-          .single()
+          .single() as { data: { id: string; role: string } | null }
 
         if (!profile) {
           // Profile doesn't exist - create it automatically with role 'student'
@@ -163,7 +164,7 @@ export default function LoginPage() {
               username,
               full_name: authData.user.user_metadata?.full_name || null,
               role: 'student', // Always set to student for automatic creation
-            })
+            } as any)
             .select()
             .single()
 
@@ -176,27 +177,27 @@ export default function LoginPage() {
               .select('id, role')
               .eq('id', authData.user.id)
               .single()
-            profile = retryProfile || undefined
+            profile = (retryProfile as { id: string; role: string } | null) || null
           } else {
             profile = newProfile
             console.log('[Login] Profile created automatically:', profile)
           }
-        } else if (profile && (!profile.role || profile.role !== 'student')) {
+        } else if (profile && (!(profile as { role?: string }).role || (profile as { role: string }).role !== 'student')) {
           // Profile exists but doesn't have student role - update it
           console.log('[Login] Updating profile role to student...')
-          await supabase
-            .from('profiles')
+          await (supabase.from('profiles') as any)
             .update({ role: 'student' })
             .eq('id', authData.user.id)
-          profile.role = 'student'
+          profile = profile ? { ...(profile as { id: string; role: string }), role: 'student' } : null
         }
 
         // Get user profile to determine role
         let redirectPath = '/student/dashboard' // Default to student dashboard
+        const profileRole = profile ? (profile as { role: string }).role : null
         
-        if (profile?.role === 'admin') {
+        if (profileRole === 'admin') {
           redirectPath = '/admin/dashboard'
-        } else if (profile?.role === 'student') {
+        } else if (profileRole === 'student') {
           redirectPath = '/student/dashboard'
         }
 
