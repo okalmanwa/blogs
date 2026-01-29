@@ -12,7 +12,9 @@ interface KebabMenuProps {
 
 export function KebabMenu({ onDelete, onEdit, deleteLabel = 'Delete', editLabel = 'Edit' }: KebabMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [positionUp, setPositionUp] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -23,6 +25,14 @@ export function KebabMenu({ onDelete, onEdit, deleteLabel = 'Delete', editLabel 
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
+      
+      // Check if dropdown would overflow below viewport
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        const dropdownHeight = 100 // Approximate height of dropdown
+        setPositionUp(spaceBelow < dropdownHeight)
+      }
     }
 
     return () => {
@@ -43,6 +53,7 @@ export function KebabMenu({ onDelete, onEdit, deleteLabel = 'Delete', editLabel 
   return (
     <div className="relative" ref={menuRef}>
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-cornell-red focus:ring-offset-2"
         aria-label="More options"
@@ -59,7 +70,9 @@ export function KebabMenu({ onDelete, onEdit, deleteLabel = 'Delete', editLabel 
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+        <div className={`absolute right-0 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[9999] ${
+          positionUp ? 'bottom-full mb-2' : 'top-full mt-2'
+        }`}>
           <button
             onClick={handleEdit}
             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"

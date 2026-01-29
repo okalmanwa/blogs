@@ -2,7 +2,6 @@
 
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { KebabMenu } from '@/components/ui/KebabMenu'
 import { Project } from '@/types'
 import { ProjectForm } from '@/components/forms/ProjectForm'
 import { useState } from 'react'
@@ -141,10 +140,12 @@ export function ProjectCard({ project, onEdit }: ProjectCardProps) {
             >
               Edit
             </button>
-            <KebabMenu
-              onEdit={handleEditClick}
-              onDelete={handleDeleteClick}
-            />
+            <button
+              onClick={handleDeleteClick}
+              className="text-sm text-red-600 hover:text-red-700 transition-colors"
+            >
+              Delete
+            </button>
           </div>
         </div>
       </div>

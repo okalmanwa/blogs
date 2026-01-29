@@ -279,14 +279,16 @@ export default async function HomePage({
             {recentPosts && recentPosts.length > 0 && (
               <div className="bg-white rounded-xl shadow-md border border-gray-200/60 p-5">
                 <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-4 pb-2 border-b border-gray-200">Recent Posts</h3>
-                <div className="divide-y divide-gray-100">
-                  {recentPosts.map((post: any) => (
+                <div className="space-y-0">
+                  {recentPosts.map((post: any, index: number) => (
                     <Link
                       key={post.id}
                       href={`/blogs/${post.slug}`}
-                      className="block py-3 first:pt-0 last:pb-0 group"
+                      className={`block py-2.5 group transition-colors duration-200 ${
+                        index > 0 ? 'border-t border-gray-100' : ''
+                      }`}
                     >
-                      <p className="text-sm text-gray-600 group-hover:text-cornell-red leading-snug line-clamp-2 transition-colors duration-200">
+                      <p className="text-xs text-gray-600 group-hover:text-cornell-red leading-snug line-clamp-2 transition-colors duration-200">
                         {post.title}
                       </p>
                     </Link>
@@ -299,20 +301,25 @@ export default async function HomePage({
             {projects && projects.length > 0 && (
               <div className="bg-white rounded-xl shadow-md border border-gray-200/60 p-5">
                 <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-4 pb-2 border-b border-gray-200">Projects</h3>
-                <div className="divide-y divide-gray-100">
-                  {projects.slice(0, 10).map((project: any) => {
+                <div className="space-y-0">
+                  {projects.slice(0, 10).map((project: any, index: number) => {
                     const isActive = searchParams.project === project.id
                     return (
                       <Link
                         key={project.id}
                         href={isActive ? '/' : `/?project=${project.id}`}
-                        className={`block py-2.5 first:pt-0 last:pb-0 text-sm transition-colors duration-200 ${
+                        className={`block py-2.5 transition-colors duration-200 ${
+                          index > 0 ? 'border-t border-gray-100' : ''
+                        } ${
                           isActive 
                             ? 'text-cornell-red font-semibold' 
                             : 'text-gray-600 hover:text-cornell-red'
                         }`}
+                        title={project.name}
                       >
-                        {project.name}
+                        <span className="text-xs leading-snug line-clamp-1 block">
+                          {project.name}
+                        </span>
                       </Link>
                     )
                   })}

@@ -36,19 +36,19 @@ export function BlogPostCard({ post, readTime, plainTextContent, isLead = false 
   return (
     <>
       <div className="relative group">
-        <Link href={`/blogs/${post.slug}`} className="block cursor-pointer">
+        <Link href={`/blogs/${post.slug}`} className="block cursor-pointer group/link">
           <article 
-            className={`relative transition-colors duration-150 border-l-2 ${
+            className={`relative transition-all duration-200 border-l-2 rounded-r-lg ${
               isLead 
-                ? 'px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-gray-50/60 via-gray-50/40 to-transparent border-cornell-red/30 hover:from-gray-50/80 hover:via-gray-50/60' 
-                : 'px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-50/20 border-transparent hover:bg-gray-50/40 hover:border-gray-300/40'
+                ? 'px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-cornell-red/5 via-gray-50/60 to-transparent border-cornell-red/40 shadow-sm hover:shadow-md hover:from-cornell-red/8 hover:via-gray-50/70 hover:border-cornell-red/50' 
+                : 'px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-50/20 border-transparent hover:bg-gray-50/50 hover:border-gray-300/50 hover:shadow-sm'
             }`}
           >
             <div className="flex items-start justify-between gap-3 sm:gap-4">
               <div className="flex-1 min-w-0">
                 {/* Latest label - above title */}
                 {isLead && (
-                  <div className="mb-1 sm:mb-1.5">
+                  <div className="mb-1.5 sm:mb-2">
                     <span className="inline-block text-[10px] sm:text-xs font-semibold text-cornell-red uppercase tracking-wider">
                       Latest
                     </span>
@@ -56,37 +56,37 @@ export function BlogPostCard({ post, readTime, plainTextContent, isLead = false 
                 )}
                 
                 {/* Title */}
-                <h2 className={`font-serif font-semibold text-gray-900 leading-tight line-clamp-2 ${
-                  isLead ? 'text-lg sm:text-2xl mb-1 sm:mb-1.5' : 'text-base sm:text-lg mb-1'
+                <h2 className={`font-serif font-semibold text-gray-900 leading-tight line-clamp-2 group-hover/link:text-cornell-red transition-colors ${
+                  isLead ? 'text-xl sm:text-2xl md:text-3xl mb-1.5 sm:mb-2' : 'text-base sm:text-lg mb-1'
                 }`}>
                   {post.title || 'Untitled Post'}
                 </h2>
 
                 {/* Preview - Limited to 2 lines max on mobile */}
                 <p className={`text-gray-500 leading-snug sm:leading-relaxed ${
-                  isLead ? 'text-sm sm:text-base mb-1.5 sm:mb-2.5 line-clamp-2 sm:line-clamp-3' : 'text-xs sm:text-sm mb-1 line-clamp-2 sm:line-clamp-1'
+                  isLead ? 'text-sm sm:text-base mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-3' : 'text-xs sm:text-sm mb-1.5 line-clamp-2 sm:line-clamp-1'
                 }`}>
                   {preview}
                 </p>
 
-                {/* Metadata - Smaller, lower contrast */}
+                {/* Metadata - Smaller, lower contrast, consistent */}
                 <div className={`flex items-center gap-1 text-[10px] sm:text-xs ${
                   isLead 
-                    ? 'text-gray-400 sm:text-gray-500 opacity-100' 
-                    : 'text-gray-400 opacity-60 sm:opacity-0 sm:group-hover:opacity-100'
+                    ? 'text-gray-400 sm:text-gray-500' 
+                    : 'text-gray-400 opacity-70 sm:opacity-0 sm:group-hover:opacity-70'
                 } transition-opacity`}>
                   <span>{post.author?.username || 'Anonymous'}</span>
-                  <span>·</span>
+                  <span className="opacity-50">·</span>
                   <span>{post.published_at ? formatDate(post.published_at) : formatDate(post.created_at)}</span>
-                  <span>·</span>
+                  <span className="opacity-50">·</span>
                   <span>{readTime} min</span>
                 </div>
               </div>
               
-              {/* Arrow indicator - Aligned with title, smaller on mobile */}
-              <div className="flex-shrink-0 pt-0.5 sm:pt-0">
+              {/* Arrow indicator - Hidden on large screens, shown on mobile/tablet */}
+              <div className="flex-shrink-0 pt-0.5 sm:pt-0 lg:hidden">
                 <svg 
-                  className="w-4 h-4 sm:w-5 sm:h-5 text-cornell-red transition-colors" 
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-cornell-red transition-colors group-hover/link:text-cornell-red/80" 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
