@@ -400,11 +400,14 @@ The platform uses Cornell's official brand colors:
 
 ## Deployment
 
-### Vercel Deployment
+See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for comprehensive deployment instructions.
 
-1. Push your code to GitHub
-2. Import project in Vercel
-3. Add environment variables
+**Quick Start (Vercel):**
+1. Push code to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Add environment variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 4. Deploy
 
 The platform is optimized for Vercel deployment with Next.js.
