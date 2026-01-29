@@ -38,10 +38,10 @@ export function BlogPostCard({ post, readTime, plainTextContent, isLead = false 
       <div className="relative group">
         <Link href={`/blogs/${post.slug}`} className="block cursor-pointer group/link">
           <article 
-            className={`relative transition-all duration-200 border-l-2 rounded-r-lg ${
+            className={`relative transition-all duration-200 ${
               isLead 
-                ? 'px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-cornell-red/5 via-gray-50/60 to-transparent border-cornell-red/40 shadow-sm hover:shadow-md hover:from-cornell-red/8 hover:via-gray-50/70 hover:border-cornell-red/50' 
-                : 'px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-50/20 border-transparent hover:bg-gray-50/50 hover:border-gray-300/50 hover:shadow-sm'
+                ? 'px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-cornell-red/15 via-cornell-red/8 to-transparent hover:from-cornell-red/20 hover:via-cornell-red/12' 
+                : 'px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-50/20 border-l-2 border-transparent hover:bg-gray-50/50 hover:border-gray-300/50 hover:shadow-sm rounded-r-lg'
             }`}
           >
             <div className="flex items-start justify-between gap-3 sm:gap-4">

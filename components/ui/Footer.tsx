@@ -125,18 +125,6 @@ export async function Footer() {
                   Help & Support
                 </a>
                 <a 
-                  href="mailto:admin@cornell.edu" 
-                  className="text-sm text-gray-300 hover:text-white transition-colors"
-                >
-                  Report a Problem
-                </a>
-                <Link 
-                  href="/accessibility" 
-                  className="text-sm text-gray-300 hover:text-white transition-colors"
-                >
-                  Accessibility
-                </Link>
-                <a 
                   href="https://privacy.cornell.edu" 
                   target="_blank"
                   rel="noopener noreferrer"
