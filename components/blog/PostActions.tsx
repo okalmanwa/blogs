@@ -44,8 +44,8 @@ export function PostActions({ postId, postSlug, authorId, currentUserId }: PostA
           .from('profiles')
           .select('role')
           .eq('id', user.id)
-          .single()
-        isAdmin = profile?.role === 'admin'
+          .single() as { data: { role: string } | null }
+        isAdmin = (profile as { role?: string } | null)?.role === 'admin'
       } else {
         // Check for hardcoded user cookie
         const cookies = document.cookie.split(';')
