@@ -51,26 +51,28 @@ export function CommentsSection({ postId }: CommentsSectionProps) {
   }
 
   const loadComments = async () => {
-    const { data } = await supabase
+    const result = await supabase
       .from('comments')
       .select('*, author:profiles(*)')
       .eq('blog_post_id', postId)
       .is('parent_id', null)
       .order('created_at', { ascending: false })
+    const data = (result.data || []) as any[]
 
     if (data) {
       // Load replies for each comment
       const commentsWithReplies = await Promise.all(
-        data.map(async (comment) => {
-          const { data: replies } = await supabase
+        data.map(async (comment: any) => {
+          const repliesResult = await supabase
             .from('comments')
             .select('*, author:profiles(*)')
             .eq('parent_id', comment.id)
             .order('created_at', { ascending: true })
+          const replies = (repliesResult.data || []) as any[]
 
           return {
             ...comment,
-            replies: replies || [],
+            replies: replies,
           }
         })
       )
