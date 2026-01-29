@@ -153,8 +153,7 @@ export function CommentsSection({ postId }: CommentsSectionProps) {
   const handleSaveEdit = async (commentId: string) => {
     if (!editContent.trim()) return
 
-    const { error } = await supabase
-      .from('comments')
+    const { error } = await (supabase.from('comments') as any)
       .update({ content: editContent.trim() })
       .eq('id', commentId)
 
