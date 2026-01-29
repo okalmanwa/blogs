@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { formatDate } from '@/lib/utils'
 import { CommentWithAuthor } from '@/types'
+import { DeleteConfirmDialog } from '@/components/ui/DeleteConfirmDialog'
 
 interface CommentsSectionProps {
   postId: string
@@ -18,6 +19,7 @@ export function CommentsSection({ postId }: CommentsSectionProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editContent, setEditContent] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [replyingToId, setReplyingToId] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
   const [submittingReply, setSubmittingReply] = useState(false)
@@ -172,14 +174,19 @@ export function CommentsSection({ postId }: CommentsSectionProps) {
     setEditContent('')
   }
 
-  const handleDelete = async (commentId: string) => {
-    if (!confirm('Are you sure you want to delete this comment?')) return
+  const handleDelete = (commentId: string) => {
+    setDeleteConfirmId(commentId)
+  }
 
-    setDeletingId(commentId)
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmId) return
+
+    setDeletingId(deleteConfirmId)
+    
     const { error } = await supabase
       .from('comments')
       .delete()
-      .eq('id', commentId)
+      .eq('id', deleteConfirmId)
 
     if (error) {
       console.error('Error deleting comment:', error)
@@ -187,7 +194,13 @@ export function CommentsSection({ postId }: CommentsSectionProps) {
     } else {
       loadComments()
     }
+    
+    setDeleteConfirmId(null)
     setDeletingId(null)
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmId(null)
   }
 
   const handleReplyClick = (commentId: string) => {
@@ -576,6 +589,16 @@ export function CommentsSection({ postId }: CommentsSectionProps) {
           </div>
         )}
       </div>
+
+      {deleteConfirmId && (
+        <DeleteConfirmDialog
+          title="Delete Comment"
+          message="Are you sure you want to delete this comment? This action cannot be undone."
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+          isDeleting={deletingId === deleteConfirmId}
+        />
+      )}
     </div>
   )
 }
