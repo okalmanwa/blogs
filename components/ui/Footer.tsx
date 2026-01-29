@@ -24,8 +24,8 @@ export async function Footer() {
   let currentYear: number | null = null
   
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
+    const { data: profile } = await (supabase
+      .from('profiles') as any)
       .select('role')
       .eq('id', user.id)
       .single()
@@ -36,8 +36,8 @@ export async function Footer() {
 
   // Get current academic year from most recent open project
   if (userRole === 'admin') {
-    const { data: openProjects } = await supabase
-      .from('projects')
+    const { data: openProjects } = await (supabase
+      .from('projects') as any)
       .select('year')
       .eq('status', 'open')
       .order('year', { ascending: false })
@@ -47,8 +47,8 @@ export async function Footer() {
       currentYear = openProjects[0].year
     } else {
       // Fallback to most recent project year
-      const { data: recentProjects } = await supabase
-        .from('projects')
+      const { data: recentProjects } = await (supabase
+        .from('projects') as any)
         .select('year')
         .order('year', { ascending: false })
         .limit(1)

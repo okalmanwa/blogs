@@ -93,8 +93,8 @@ export function ProjectForm({ project, onSuccess, onCancel, isDeleting, defaultO
     try {
       if (project) {
         // Update existing project
-        const { error } = await supabase
-          .from('projects')
+        const { error } = await (supabase
+          .from('projects') as any)
           .update({
             name: formData.name,
             description: formData.description || null,
@@ -110,8 +110,8 @@ export function ProjectForm({ project, onSuccess, onCancel, isDeleting, defaultO
         }
       } else {
         // Create new project - admin_id can be null for hardcoded users
-        const { error } = await supabase
-          .from('projects')
+        const { error } = await (supabase
+          .from('projects') as any)
           .insert({
             name: formData.name,
             description: formData.description || null,

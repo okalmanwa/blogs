@@ -25,13 +25,18 @@ async function setupHardcodedUsers() {
   for (const [role, userData] of Object.entries(HARDCODED_USERS)) {
     try {
       // Check if user already exists
-      const { data: existingUser } = await supabase.auth.admin.getUserByEmail(userData.email)
+      const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers()
+      
+      let existingUser = null
+      if (existingUsers?.users) {
+        existingUser = existingUsers.users.find(u => u.email === userData.email)
+      }
 
-      if (existingUser?.user) {
+      if (existingUser) {
         console.log(`User ${userData.email} already exists, updating...`)
         
         // Update password
-        await supabase.auth.admin.updateUserById(existingUser.user.id, {
+        await supabase.auth.admin.updateUserById(existingUser.id, {
           password: userData.password,
         })
 
@@ -39,7 +44,7 @@ async function setupHardcodedUsers() {
         await supabase
           .from('profiles')
           .upsert({
-            id: existingUser.user.id,
+            id: existingUser.id,
             username: userData.username,
             full_name: userData.full_name,
             role: userData.role,

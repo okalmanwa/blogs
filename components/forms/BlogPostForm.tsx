@@ -163,20 +163,18 @@ export function BlogPostForm({ post, projects, returnTo }: BlogPostFormProps) {
     try {
       if (post) {
         // Update existing post
-        const updateData: BlogPostUpdate = {
-          title: formData.title,
-          content: formData.content,
-          project_id: formData.project_id || null,
-          status: formData.status,
-          updated_at: new Date().toISOString(),
-          published_at: formData.status === 'published' && post.status === 'draft'
-            ? new Date().toISOString()
-            : post.published_at,
-        }
-        
-        const { error } = await supabase
-          .from('blog_posts')
-          .update(updateData)
+        const { error } = await (supabase
+          .from('blog_posts') as any)
+          .update({
+            title: formData.title,
+            content: formData.content,
+            project_id: formData.project_id || null,
+            status: formData.status,
+            updated_at: new Date().toISOString(),
+            published_at: formData.status === 'published' && post.status === 'draft'
+              ? new Date().toISOString()
+              : post.published_at,
+          })
           .eq('id', post.id)
 
         if (error) {
@@ -190,8 +188,8 @@ export function BlogPostForm({ post, projects, returnTo }: BlogPostFormProps) {
         console.log('[BlogPostForm] User from auth:', user?.id)
         console.log('[BlogPostForm] Hardcoded user data:', isHardcodedUser)
         
-        const { data: createdPost, error } = await supabase
-          .from('blog_posts')
+        const { data: createdPost, error } = await (supabase
+          .from('blog_posts') as any)
           .insert({
             title: formData.title,
             content: formData.content,

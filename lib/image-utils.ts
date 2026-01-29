@@ -52,13 +52,14 @@ export function processImageUrls(content: string): string {
             // Try markdown format first: ![caption](url)
             const markdownMatch = trimmed.match(/!\[([^\]]*)\]\(([^)]+)\)/)
             let caption: string | null = null
+            let captionMatch: RegExpMatchArray | null = null
             
             if (markdownMatch && markdownMatch[2] === match[0]) {
               // This image URL is part of a markdown image
               caption = markdownMatch[1].trim() || null
             } else {
               // Try caption on next line (single line after image URL)
-              const captionMatch = afterImage.match(/^[\n\r]+(.+?)(?:\n\n|$)/)
+              captionMatch = afterImage.match(/^[\n\r]+(.+?)(?:\n\n|$)/)
               caption = captionMatch ? captionMatch[1].trim() : null
             }
             
@@ -70,7 +71,7 @@ export function processImageUrls(content: string): string {
                 </div>
                 <figcaption class="text-center text-sm text-gray-600 mt-3 italic">${caption}</figcaption>
               </figure>`)
-              lastIndex = IMAGE_URL_REGEX.lastIndex + (captionMatch.index || 0) + captionMatch[0].length
+              lastIndex = IMAGE_URL_REGEX.lastIndex + (captionMatch ? (captionMatch.index || 0) + captionMatch[0].length : 0)
             } else {
               parts.push(`<figure class="my-10">
                 <div class="flex justify-center border-2 border-gray-200 rounded-lg p-2 bg-gray-50">

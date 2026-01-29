@@ -54,8 +54,8 @@ export function EditPostWrapper({ postId, returnTo }: EditPostWrapperProps) {
         }
 
         // Fetch post using browser client (has session, so RLS allows drafts)
-        const { data: fetchedPost, error: postError } = await supabase
-          .from('blog_posts')
+        const { data: fetchedPost, error: postError } = await (supabase
+          .from('blog_posts') as any)
           .select('*')
           .eq('id', postId)
           .single()
@@ -76,8 +76,8 @@ export function EditPostWrapper({ postId, returnTo }: EditPostWrapperProps) {
         // Check if user owns the post
         if (fetchedPost.author_id !== userId) {
           // Check if user is admin
-          const { data: profile } = await supabase
-            .from('profiles')
+          const { data: profile } = await (supabase
+            .from('profiles') as any)
             .select('role')
             .eq('id', userId)
             .single()
@@ -90,8 +90,8 @@ export function EditPostWrapper({ postId, returnTo }: EditPostWrapperProps) {
         }
 
         // Fetch projects
-        const { data: fetchedProjects } = await supabase
-          .from('projects')
+        const { data: fetchedProjects } = await (supabase
+          .from('projects') as any)
           .select('*')
           .order('year', { ascending: false })
 
