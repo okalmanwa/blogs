@@ -2,7 +2,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
-import { Button } from './Button'
 import { UserMenu } from './UserMenu'
 import { SignOutButton } from './SignOutButton'
 import { NavLink } from './NavLink'
@@ -84,12 +83,18 @@ export async function Header() {
                 )}
               </>
             ) : (
-              <div className="flex items-center space-x-4">
-                <Link href="/login">
-                  <Button variant="outline">Login</Button>
+              <div className="flex items-center space-x-3">
+                <Link 
+                  href="/login"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  Login
                 </Link>
-                <Link href="/register">
-                  <Button variant="primary">Sign Up</Button>
+                <Link 
+                  href="/register"
+                  className="px-4 py-2 text-sm font-semibold text-white bg-cornell-red hover:bg-cornell-red/90 rounded-lg transition-colors"
+                >
+                  Sign Up
                 </Link>
               </div>
             )}

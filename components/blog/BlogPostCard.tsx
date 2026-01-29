@@ -40,7 +40,7 @@ export function BlogPostCard({ post, readTime, plainTextContent, isLead = false 
           <article 
             className={`relative transition-all duration-200 ${
               isLead 
-                ? 'px-4 sm:px-6 py-4 sm:py-5 bg-gradient-to-r from-cornell-red/15 via-cornell-red/8 to-transparent hover:from-cornell-red/20 hover:via-cornell-red/12' 
+                ? 'px-4 sm:px-6 py-4 sm:py-5 -mb-3 sm:-mb-4 bg-gradient-to-r from-cornell-red/15 via-cornell-red/8 to-transparent hover:from-cornell-red/20 hover:via-cornell-red/12' 
                 : 'px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-50/20 border-l-2 border-transparent hover:bg-gray-50/50 hover:border-gray-300/50 hover:shadow-sm rounded-r-lg'
             }`}
           >
