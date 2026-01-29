@@ -39,8 +39,7 @@ export function CommentRow({ comment }: CommentRowProps) {
 
     setIsDeleting(true)
     try {
-      const { error } = await supabase
-        .from('comments')
+      const { error } = await (supabase.from('comments') as any)
         .update({ content: editContent.trim() })
         .eq('id', comment.id)
 
