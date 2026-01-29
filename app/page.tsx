@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { BlogPostWithAuthor } from '@/types'
 import { SearchForm } from '@/components/blog/SearchForm'
 import { FilterSidebar } from '@/components/blog/FilterSidebar'
-import { SortMenu } from '@/components/blog/SortMenu'
 import { BlogPostCard } from '@/components/blog/BlogPostCard'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
@@ -156,10 +155,6 @@ export default async function HomePage({
             {/* Filter Sidebar Button - Mobile only, no wrapping */}
             <div className="flex-shrink-0 md:hidden">
               <FilterSidebar projects={projects || []} currentProject={searchParams.project} />
-            </div>
-            {/* Sort button - Desktop only */}
-            <div className="hidden md:flex items-center flex-shrink-0">
-              <SortMenu />
             </div>
           </div>
         </div>
