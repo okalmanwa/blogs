@@ -8,6 +8,9 @@ import { Card } from '@/components/ui/Card'
 import { slugify } from '@/lib/utils'
 import { isImageUrl, processImageUrls } from '@/lib/image-utils'
 import { BlogPost, Project } from '@/types'
+import { Database } from '@/types/database'
+
+type BlogPostUpdate = Database['public']['Tables']['blog_posts']['Update']
 
 interface BlogPostFormProps {
   post?: BlogPost
@@ -160,18 +163,20 @@ export function BlogPostForm({ post, projects, returnTo }: BlogPostFormProps) {
     try {
       if (post) {
         // Update existing post
+        const updateData: BlogPostUpdate = {
+          title: formData.title,
+          content: formData.content,
+          project_id: formData.project_id || null,
+          status: formData.status,
+          updated_at: new Date().toISOString(),
+          published_at: formData.status === 'published' && post.status === 'draft'
+            ? new Date().toISOString()
+            : post.published_at,
+        }
+        
         const { error } = await supabase
           .from('blog_posts')
-          .update({
-            title: formData.title,
-            content: formData.content,
-            project_id: formData.project_id || null,
-            status: formData.status,
-            updated_at: new Date().toISOString(),
-            published_at: formData.status === 'published' && post.status === 'draft'
-              ? new Date().toISOString()
-              : post.published_at,
-          })
+          .update(updateData)
           .eq('id', post.id)
 
         if (error) {
