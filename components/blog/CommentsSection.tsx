@@ -224,8 +224,7 @@ export function CommentsSection({ postId }: CommentsSectionProps) {
 
     setSubmittingReply(true)
 
-    const { error } = await supabase
-      .from('comments')
+    const { error } = await (supabase.from('comments') as any)
       .insert({
         content: replyContent.trim(),
         blog_post_id: postId,
