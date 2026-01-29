@@ -42,10 +42,10 @@ export function BlogPostForm({ post, projects, returnTo }: BlogPostFormProps) {
           .from('profiles')
           .select('username, full_name')
           .eq('id', user.id)
-          .single()
+          .single() as { data: { username?: string; full_name?: string | null } | null }
         
         if (profile) {
-          setAuthorName(profile.username || profile.full_name || 'You')
+          setAuthorName((profile as { username?: string; full_name?: string | null }).username || (profile as { username?: string; full_name?: string | null }).full_name || 'You')
         } else {
           // Check hardcoded user cookie
           const cookies = document.cookie.split(';')
