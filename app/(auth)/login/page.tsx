@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { createClient } from '@/lib/supabase/client'
-import { isHardcodedUser } from '@/lib/hardcoded-users'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -21,85 +20,7 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    // Check if it's a hardcoded user first
-    const hardcodedUser = isHardcodedUser(email, password)
-    
-    if (hardcodedUser) {
-      // Hardcoded users are real Supabase users, so sign them in
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: hardcodedUser.user.email,
-        password: hardcodedUser.user.password,
-      })
-
-      if (authError) {
-        setError(authError.message || 'Failed to sign in. Make sure the hardcoded users are set up in Supabase.')
-        setLoading(false)
-        return
-      }
-
-      if (authData.user) {
-        // Wait a moment for session to be established
-        await new Promise(resolve => setTimeout(resolve, 100))
-        
-        // Verify session is established
-        const { data: { session } } = await supabase.auth.getSession()
-        if (!session) {
-          setError('Session not established. Please try again.')
-          setLoading(false)
-          return
-        }
-
-        // Store user info in cookie for middleware/auth checks (as fallback)
-        const userData = {
-          email: hardcodedUser.user.email,
-          username: hardcodedUser.user.username,
-          role: hardcodedUser.role,
-          id: authData.user.id
-        }
-        
-        // Set cookie via API route (server-side) for better reliability
-        try {
-          const response = await fetch('/api/auth/set-hardcoded-user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userData }),
-          })
-
-          if (!response.ok) {
-            throw new Error('Failed to set authentication cookie')
-          }
-        } catch (error) {
-          console.error('Error setting cookie:', error)
-          // Fallback to client-side cookie setting
-          const cookieValue = encodeURIComponent(JSON.stringify(userData))
-          document.cookie = `hardcoded_user=${cookieValue}; path=/; max-age=86400; SameSite=Lax`
-        }
-
-        // Get user profile to determine role
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', authData.user.id)
-          .single()
-
-        // Determine redirect path based on role
-        let redirectPath = '/'
-        const profileRole = profile ? (profile as { role: string }).role : null
-        if (profileRole === 'admin' || hardcodedUser.role === 'admin') {
-          redirectPath = '/admin/dashboard'
-        } else if (profileRole === 'student' || hardcodedUser.role === 'student') {
-          redirectPath = '/student/dashboard'
-        }
-
-        // Force full page reload to ensure session cookies are set
-        window.location.href = redirectPath
-      }
-      return
-    }
-
-    // Try Supabase auth
+    // Sign in with Supabase auth
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
