@@ -45,10 +45,11 @@ export default async function HomePage({
   // If filtering by project status, get project IDs first
   let projectIds: string[] | null = null
   if (searchParams.projectStatus) {
-    const { data: filteredProjects } = await supabase
+    const result = await supabase
       .from('projects')
       .select('id')
       .eq('status', searchParams.projectStatus)
+    const filteredProjects = (result.data || []) as { id: string }[]
     
     if (filteredProjects && filteredProjects.length > 0) {
       projectIds = filteredProjects.map(p => p.id)
