@@ -51,10 +51,12 @@ export default async function AdminProjectsPage() {
   // Create a fresh client instance to avoid any caching issues
   const projectsClient = createClient()
   
-  const { data: projects, error: projectsError } = await projectsClient
+  const result = await projectsClient
     .from('projects')
     .select('*')
     .order('year', { ascending: false })
+  const projects = (result.data || []) as any[]
+  const projectsError = result.error
   
   // Log for debugging - this will appear in server logs
   if (projectsError) {
