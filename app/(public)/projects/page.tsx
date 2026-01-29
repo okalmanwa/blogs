@@ -6,10 +6,11 @@ import { formatDate } from '@/lib/utils'
 export default async function ProjectsPage() {
   const supabase = createClient()
 
-  const { data: projects } = await supabase
+  const result = await supabase
     .from('projects')
     .select('*')
     .order('year', { ascending: false })
+  const projects = (result.data || []) as any[]
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
