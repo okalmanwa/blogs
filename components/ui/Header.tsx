@@ -5,18 +5,19 @@ import { UserMenu } from './UserMenu'
 import { SignOutButton } from './SignOutButton'
 import { NavLink } from './NavLink'
 import { MobileNav } from './MobileNav'
+import { Profile } from '@/types'
 
 export async function Header() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
-  let profile = null
+  let profile: Profile | null = null
   if (user) {
     const { data } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .single() as { data: Profile | null }
     profile = data
   }
 

@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { Database } from '@/types/database'
+
+type GalleryImageInsert = Database['public']['Tables']['gallery_images']['Insert']
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,16 +45,20 @@ export async function POST(request: NextRequest) {
       .from('images')
       .getPublicUrl(filePath)
 
-    // Save to database
+    // Save to database - using strict Database types for insertData
+    const insertData: GalleryImageInsert = {
+      url: publicUrl,
+      title: title || null,
+      description: description || null,
+      author_id: user.id,
+      project_id: projectId,
+    }
+    
+    // Type assertion needed due to Supabase TypeScript limitation with string literal table names
+    // The insertData is strictly typed using Database['public']['Tables']['gallery_images']['Insert']
     const { data, error: dbError } = await (supabase
       .from('gallery_images') as any)
-      .insert({
-        url: publicUrl,
-        title: title || null,
-        description: description || null,
-        author_id: user.id,
-        project_id: projectId,
-      })
+      .insert(insertData)
       .select()
       .single()
 
