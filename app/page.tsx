@@ -280,63 +280,73 @@ export default async function HomePage({
           )}
         </div>
 
-        {/* Sidebar - Enhanced styling */}
-        <aside className="hidden lg:block w-64 flex-shrink-0">
-          <div className="sticky top-8 space-y-5">
-            {/* Recent Posts - Titles only */}
+        {/* Sidebar - Modern styling */}
+        <aside className="hidden lg:block w-72 flex-shrink-0">
+          <div className="sticky top-8 space-y-6">
+            {/* Recent Posts */}
             {recentPosts && recentPosts.length > 0 && (
-              <div className="bg-white rounded-xl shadow-md border border-gray-200/60 p-5">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-4 pb-2 border-b border-gray-200">Recent Posts</h3>
-                <div className="space-y-0">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-cornell-red to-cornell-red/90 px-6 py-4">
+                  <h3 className="text-sm font-bold text-white tracking-wide">Recent Posts</h3>
+                </div>
+                <div className="p-4 space-y-1">
                   {recentPosts.map((post: any, index: number) => (
                     <Link
                       key={post.id}
                       href={`/blogs/${post.slug}`}
-                      className={`block py-2.5 group transition-colors duration-200 ${
-                        index > 0 ? 'border-t border-gray-100' : ''
-                      }`}
+                      className="block group"
                     >
-                      <p className="text-xs text-gray-600 group-hover:text-cornell-red leading-snug line-clamp-2 transition-colors duration-200">
-                        {post.title}
-                      </p>
+                      <div className="px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors duration-150">
+                        <p className="text-sm text-gray-700 group-hover:text-cornell-red leading-relaxed line-clamp-2 transition-colors duration-150 font-medium">
+                          {post.title}
+                        </p>
+                      </div>
                     </Link>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Projects - Filter links (click = filter feed) */}
+            {/* Projects Filter */}
             {projects && projects.length > 0 && (
-              <div className="bg-white rounded-xl shadow-md border border-gray-200/60 p-5">
-                <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-4 pb-2 border-b border-gray-200">Projects</h3>
-                <div className="space-y-0">
-                  {projects.slice(0, 10).map((project: any, index: number) => {
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 px-6 py-4 border-b border-gray-100">
+                  <h3 className="text-sm font-bold text-gray-900 tracking-wide">Filter by Project</h3>
+                </div>
+                <div className="p-4 space-y-1 max-h-[500px] overflow-y-auto">
+                  {projects.slice(0, 10).map((project: any) => {
                     const isActive = searchParams.project === project.id
                     return (
                       <Link
                         key={project.id}
                         href={isActive ? '/' : `/?project=${project.id}`}
-                        className={`block py-2.5 transition-colors duration-200 ${
-                          index > 0 ? 'border-t border-gray-100' : ''
-                        } ${
-                          isActive 
-                            ? 'text-cornell-red font-semibold' 
-                            : 'text-gray-600 hover:text-cornell-red'
-                        }`}
+                        className="block group"
                         title={project.name}
                       >
-                        <span className="text-xs leading-snug line-clamp-1 block">
-                          {project.name}
-                        </span>
+                        <div className={`px-3 py-2.5 rounded-lg transition-all duration-150 ${
+                          isActive 
+                            ? 'bg-cornell-red/10 border-l-2 border-cornell-red' 
+                            : 'hover:bg-gray-50 border-l-2 border-transparent'
+                        }`}>
+                          <span className={`text-sm leading-relaxed line-clamp-1 block ${
+                            isActive 
+                              ? 'text-cornell-red font-semibold' 
+                              : 'text-gray-700 group-hover:text-cornell-red'
+                          }`}>
+                            {project.name}
+                          </span>
+                        </div>
                       </Link>
                     )
                   })}
                   {projects.length > 10 && (
                     <Link
                       href="/projects"
-                      className="block text-xs text-gray-500 hover:text-cornell-red transition-colors pt-3 mt-2 border-t border-gray-200 font-medium"
+                      className="block mt-3 pt-3 border-t border-gray-100"
                     >
-                      View all →
+                      <div className="px-3 py-2 text-sm text-gray-600 hover:text-cornell-red transition-colors duration-150 font-medium">
+                        View all projects →
+                      </div>
                     </Link>
                   )}
                 </div>
