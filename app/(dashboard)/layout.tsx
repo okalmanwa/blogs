@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 
@@ -11,36 +10,19 @@ export default async function DashboardLayout({
 }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
-  // Check for hardcoded user
-  const cookieStore = cookies()
-  const hardcodedUserCookie = cookieStore.get('hardcoded_user')
-  let hardcodedUser = null
-  if (hardcodedUserCookie) {
-    try {
-      hardcodedUser = JSON.parse(decodeURIComponent(hardcodedUserCookie.value))
-    } catch (e) {
-      // Invalid cookie
-    }
-  }
 
-  if (!user && !hardcodedUser) {
+  if (!user) {
     redirect('/login')
   }
 
-  // Determine role
-  let userRole = 'student'
-  if (hardcodedUser) {
-    userRole = hardcodedUser.role
-  } else if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single() as { data: { role: string } | null }
-    userRole = (profile as { role?: string } | null)?.role || 'student'
-  }
+  // Get role from database
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single() as { data: { role: string } | null }
 
+  const userRole = profile?.role || 'student'
   const isAdmin = userRole === 'admin'
   const basePath = isAdmin ? '/admin' : '/student'
 

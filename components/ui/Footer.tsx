@@ -1,24 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 
 export async function Footer() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
-  // Check for hardcoded user
-  const cookieStore = cookies()
-  const hardcodedUserCookie = cookieStore.get('hardcoded_user')
-  let hardcodedUser = null
-  if (hardcodedUserCookie) {
-    try {
-      hardcodedUser = JSON.parse(decodeURIComponent(hardcodedUserCookie.value))
-    } catch (e) {
-      // Invalid cookie
-    }
-  }
-
   // Get user role and context
   let userRole: string | null = null
   let currentYear: number | null = null
@@ -30,8 +17,6 @@ export async function Footer() {
       .eq('id', user.id)
       .single()
     userRole = profile?.role || null
-  } else if (hardcodedUser) {
-    userRole = hardcodedUser.role || null
   }
 
   // Get current academic year from most recent open project

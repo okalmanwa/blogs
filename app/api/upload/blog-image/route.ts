@@ -30,49 +30,11 @@ export async function POST(request: NextRequest) {
     
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Check for hardcoded user cookie if no Supabase user
-    let userId: string | null = null
-    if (user) {
-      userId = user.id
-    } else {
-      // Check for hardcoded user cookie
-      const hardcodedUserCookie = request.cookies.get('hardcoded_user')
-      if (hardcodedUserCookie) {
-        try {
-          const userData = JSON.parse(decodeURIComponent(hardcodedUserCookie.value))
-          if (userData.id && !userData.id.startsWith('hardcoded-')) {
-            userId = userData.id
-            // Try to get the user from Supabase using the ID
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('id')
-              .eq('id', userId)
-              .single()
-            
-            if (!profile) {
-              return NextResponse.json({ error: 'User not found' }, { status: 401 })
-            }
-          }
-        } catch (e) {
-          // Invalid cookie
-        }
-      }
-    }
-
-    // Ensure we have a valid Supabase user session for storage operations
-    if (!user && !userId) {
-      return NextResponse.json({ error: 'Unauthorized. Please log in to upload images.' }, { status: 401 })
-    }
-
-    // Storage operations require an authenticated Supabase session
-    // If we don't have a user from Supabase auth, we can't upload to storage
+    // Get user ID from Supabase auth
     if (!user) {
-      return NextResponse.json({ 
-        error: 'No active session. Please log out and log back in to refresh your session.' 
-      }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    // Use the authenticated user's ID
     const authenticatedUserId = user.id
 
     const formData = await request.formData()

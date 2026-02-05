@@ -45,7 +45,6 @@ export function MobileNav({ isAuthenticated, isAdmin }: MobileNavProps) {
 
   const handleSignOut = async () => {
     const supabase = createClient()
-    document.cookie = 'hardcoded_user=; path=/; max-age=0'
     await supabase.auth.signOut()
     window.location.href = '/'
   }
@@ -109,7 +108,6 @@ export function MobileNav({ isAuthenticated, isAdmin }: MobileNavProps) {
                 <button
                   onClick={async () => {
                     const supabase = createClient()
-                    document.cookie = 'hardcoded_user=; path=/; max-age=0'
                     await supabase.auth.signOut()
                     window.location.href = '/'
                   }}
@@ -137,7 +135,6 @@ export function MobileNav({ isAuthenticated, isAdmin }: MobileNavProps) {
                 <button
                   onClick={async () => {
                     const supabase = createClient()
-                    document.cookie = 'hardcoded_user=; path=/; max-age=0'
                     await supabase.auth.signOut()
                     window.location.href = '/'
                   }}

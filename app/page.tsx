@@ -5,7 +5,6 @@ import { FilterSidebar } from '@/components/blog/FilterSidebar'
 import { BlogPostCard } from '@/components/blog/BlogPostCard'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
-import { cookies } from 'next/headers'
 
 export default async function HomePage({
   searchParams,
@@ -16,18 +15,9 @@ export default async function HomePage({
   
   // Check if user is admin
   const { data: { user } } = await supabase.auth.getUser()
-  const cookieStore = cookies()
-  const hardcodedUserCookie = cookieStore.get('hardcoded_user')
   let isAdmin = false
   
-  if (hardcodedUserCookie) {
-    try {
-      const hardcodedUser = JSON.parse(decodeURIComponent(hardcodedUserCookie.value))
-      isAdmin = hardcodedUser.role === 'admin'
-    } catch (e) {
-      // Invalid cookie
-    }
-  } else if (user) {
+  if (user) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')

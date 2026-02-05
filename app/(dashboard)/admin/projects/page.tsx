@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
 import { Card } from '@/components/ui/Card'
 import { CreateProjectButton } from '@/components/forms/CreateProjectButton'
 import { RefreshButton } from '@/components/ui/RefreshButton'
@@ -13,37 +12,19 @@ export const revalidate = 0
 export default async function AdminProjectsPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
-  // Check for hardcoded user
-  const cookieStore = cookies()
-  const hardcodedUserCookie = cookieStore.get('hardcoded_user')
-  let hardcodedUser = null
-  if (hardcodedUserCookie) {
-    try {
-      hardcodedUser = JSON.parse(decodeURIComponent(hardcodedUserCookie.value))
-    } catch (e) {
-      // Invalid cookie
-    }
-  }
 
-  if (!user && !hardcodedUser) {
+  if (!user) {
     redirect('/login')
   }
 
-  // Check role
-  let isAdmin = false
-  if (hardcodedUser) {
-    isAdmin = hardcodedUser.role === 'admin'
-  } else if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single() as { data: { role: string } | null }
-    isAdmin = (profile as { role?: string } | null)?.role === 'admin'
-  }
+  // Check role from database
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single() as { data: { role: string } | null }
 
-  if (!isAdmin) {
+  if (!profile || profile.role !== 'admin') {
     redirect('/student/dashboard')
   }
 

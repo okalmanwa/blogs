@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
 import { EditPostWrapper } from '@/components/posts/EditPostWrapper'
 
 export default async function EditPostPage({
@@ -12,20 +11,8 @@ export default async function EditPostPage({
 }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
-  // Check for hardcoded user
-  const cookieStore = cookies()
-  const hardcodedUserCookie = cookieStore.get('hardcoded_user')
-  let hardcodedUser = null
-  if (hardcodedUserCookie) {
-    try {
-      hardcodedUser = JSON.parse(decodeURIComponent(hardcodedUserCookie.value))
-    } catch (e) {
-      // Invalid cookie
-    }
-  }
 
-  if (!user && !hardcodedUser) {
+  if (!user) {
     redirect('/login')
   }
 

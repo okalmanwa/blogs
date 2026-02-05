@@ -49,17 +49,6 @@ export async function middleware(request: NextRequest) {
     console.warn('[Middleware] Get user error:', userError.message)
   }
 
-  // Check for hardcoded user in cookies (set by login) - moved after session refresh
-  const hardcodedUserCookieAfterRefresh = request.cookies.get('hardcoded_user')
-  let hardcodedUser = null
-  if (hardcodedUserCookieAfterRefresh) {
-    try {
-      hardcodedUser = JSON.parse(decodeURIComponent(hardcodedUserCookieAfterRefresh.value))
-    } catch (e) {
-      // Invalid cookie, ignore
-    }
-  }
-
   // Skip auth check for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
     return response
@@ -68,71 +57,60 @@ export async function middleware(request: NextRequest) {
   // Protect dashboard routes
   if (request.nextUrl.pathname.startsWith('/student') || 
       request.nextUrl.pathname.startsWith('/admin')) {
-    if (!user && !hardcodedUser) {
+    if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
 
-  // Protect admin routes
+  // Protect admin routes - check role from database
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (hardcodedUser) {
-      if (hardcodedUser.role !== 'admin') {
-        if (hardcodedUser.role === 'student') {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      // Only allow if profile exists and role is admin
+      if (!profile || profile.role !== 'admin') {
+        if (profile?.role === 'student') {
           return NextResponse.redirect(new URL('/student/dashboard', request.url))
         } else {
           return NextResponse.redirect(new URL('/', request.url))
         }
       }
-    } else if (user) {
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-
-        // Only allow if profile exists and role is admin
-        if (!profile || profile.role !== 'admin') {
-          if (profile?.role === 'student') {
-            return NextResponse.redirect(new URL('/student/dashboard', request.url))
-          } else {
-            return NextResponse.redirect(new URL('/', request.url))
-          }
-        }
-      } catch (error) {
-        // Profile doesn't exist - redirect to student dashboard (default)
-        return NextResponse.redirect(new URL('/student/dashboard', request.url))
-      }
+    } catch (error) {
+      // Profile doesn't exist - redirect to student dashboard (default)
+      return NextResponse.redirect(new URL('/student/dashboard', request.url))
     }
   }
 
-  // Protect student routes
+  // Protect student routes - block viewers
   if (request.nextUrl.pathname.startsWith('/student')) {
-    if (hardcodedUser) {
-      if (hardcodedUser.role === 'viewer') {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      // Only block if profile exists and role is viewer
+      // If profile doesn't exist, allow access (profile will be created)
+      if (profile && profile.role === 'viewer') {
         return NextResponse.redirect(new URL('/', request.url))
       }
-      // Allow access for hardcoded students/admins
-    } else if (user) {
-      // Try to get profile, but don't block if it doesn't exist yet
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-
-        // Only block if profile exists and role is viewer
-        // If profile doesn't exist, allow access (profile will be created)
-        if (profile && profile.role === 'viewer') {
-          return NextResponse.redirect(new URL('/', request.url))
-        }
-        // If no profile or role is student/admin, allow access
-      } catch (error) {
-        // Profile doesn't exist or query failed - allow access
-        // The dashboard layout will handle creating the profile if needed
-        console.warn('Profile query failed in middleware, allowing access:', error)
-      }
+    } catch (error) {
+      // Profile doesn't exist or query failed - allow access
+      // The dashboard layout will handle creating the profile if needed
+      console.warn('Profile query failed in middleware, allowing access:', error)
     }
   }
 

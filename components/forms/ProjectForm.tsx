@@ -61,34 +61,16 @@ export function ProjectForm({ project, onSuccess, onCancel, isDeleting, defaultO
     setError('')
     setLoading(true)
 
-    // Get user ID from Supabase auth or hardcoded user cookie
-    let userId: string | null = null
-    let isHardcodedUser = false
-    
+    // Get user ID from Supabase auth
     const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      userId = user.id
-    } else {
-      // Check for hardcoded user cookie
-      const cookies = document.cookie.split(';')
-      const hardcodedCookie = cookies.find(c => c.trim().startsWith('hardcoded_user='))
-      if (hardcodedCookie) {
-        try {
-          const userData = JSON.parse(decodeURIComponent(hardcodedCookie.split('=')[1]))
-          isHardcodedUser = true
-          // For hardcoded users, we'll use null for admin_id (since it's nullable in the schema)
-          userId = null
-        } catch (e) {
-          // Invalid cookie
-        }
-      }
-    }
-
-    if (!userId && !isHardcodedUser) {
+    
+    if (!user) {
       setError('You must be logged in')
       setLoading(false)
       return
     }
+    
+    const userId = user.id
 
     try {
       if (project) {
@@ -109,7 +91,7 @@ export function ProjectForm({ project, onSuccess, onCancel, isDeleting, defaultO
           throw new Error(`Failed to update project: ${error.message}`)
         }
       } else {
-        // Create new project - admin_id can be null for hardcoded users
+        // Create new project
         const { error } = await (supabase
           .from('projects') as any)
           .insert({
@@ -117,7 +99,7 @@ export function ProjectForm({ project, onSuccess, onCancel, isDeleting, defaultO
             description: formData.description || null,
             year: formData.year,
             status: formData.status,
-            admin_id: userId, // null for hardcoded users, UUID for real users
+            admin_id: userId,
           })
 
         if (error) throw error

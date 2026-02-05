@@ -50,36 +50,10 @@ export function BlogPostForm({ post, projects, returnTo }: BlogPostFormProps) {
         if (profile) {
           setAuthorName((profile as { username?: string; full_name?: string | null }).username || (profile as { username?: string; full_name?: string | null }).full_name || 'You')
         } else {
-          // Check hardcoded user cookie
-          const cookies = document.cookie.split(';')
-          const hardcodedCookie = cookies.find(c => c.trim().startsWith('hardcoded_user='))
-          if (hardcodedCookie) {
-            try {
-              const cookieValue = hardcodedCookie.split('=').slice(1).join('=')
-              const userData = JSON.parse(decodeURIComponent(cookieValue))
-              setAuthorName(userData.username || userData.email || 'You')
-            } catch (e) {
-              setAuthorName('You')
-            }
-          } else {
-            setAuthorName('You')
-          }
-        }
-      } else {
-        // Check hardcoded user cookie
-        const cookies = document.cookie.split(';')
-        const hardcodedCookie = cookies.find(c => c.trim().startsWith('hardcoded_user='))
-        if (hardcodedCookie) {
-          try {
-            const cookieValue = hardcodedCookie.split('=').slice(1).join('=')
-            const userData = JSON.parse(decodeURIComponent(cookieValue))
-            setAuthorName(userData.username || userData.email || 'You')
-          } catch (e) {
-            setAuthorName('You')
-          }
-        } else {
           setAuthorName('You')
         }
+      } else {
+        setAuthorName('You')
       }
       
       // Log session status for debugging
@@ -102,61 +76,16 @@ export function BlogPostForm({ post, projects, returnTo }: BlogPostFormProps) {
     setError('')
     setLoading(true)
 
-    // Get user ID from Supabase auth or hardcoded user cookie
-    let userId: string | null = null
-    let isHardcodedUser = false
-    
-    // First check session, then get user
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    if (sessionError) {
-      console.error('Session error:', sessionError)
-    }
-    
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError) {
-      console.error('Get user error:', userError)
-    }
-    
-    if (user) {
-      userId = user.id
-      console.log('[BlogPostForm] User from auth:', user.id)
-    } else {
-      // Check for hardcoded user cookie
-      const cookies = document.cookie.split(';')
-      const hardcodedCookie = cookies.find(c => c.trim().startsWith('hardcoded_user='))
-      if (hardcodedCookie) {
-        try {
-          const cookieValue = hardcodedCookie.split('=').slice(1).join('=')
-          const userData = JSON.parse(decodeURIComponent(cookieValue))
-          isHardcodedUser = true
-          // If cookie has a real user ID (from Supabase), use it
-          if (userData.id && !userData.id.startsWith('hardcoded-')) {
-            userId = userData.id
-            console.log('[BlogPostForm] User from hardcoded cookie:', userId)
-          }
-        } catch (e) {
-          console.error('Error parsing hardcoded cookie:', e)
-        }
-      }
-      
-      // If still no user, try refreshing session
-      if (!userId && session) {
-        console.log('[BlogPostForm] Session exists but no user, refreshing...')
-        await supabase.auth.refreshSession()
-        const { data: { user: refreshedUser } } = await supabase.auth.getUser()
-        if (refreshedUser) {
-          userId = refreshedUser.id
-          console.log('[BlogPostForm] User after refresh:', userId)
-        }
-      }
-    }
+    // Get user ID from Supabase auth
+    const { data: { user } } = await supabase.auth.getUser()
 
-    if (!userId) {
-      console.error('[BlogPostForm] No user ID found. Session:', session?.user?.id, 'User:', user?.id)
-      setError('You must be logged in. Please refresh the page or log out and log back in.')
+    if (!user) {
+      setError('You must be logged in')
       setLoading(false)
       return
     }
+
+    const userId = user.id
 
     const slug = post?.slug || slugify(formData.title)
 
@@ -184,9 +113,6 @@ export function BlogPostForm({ post, projects, returnTo }: BlogPostFormProps) {
 
       } else {
         // Create new post
-        console.log('[BlogPostForm] Creating post with author_id:', userId)
-        console.log('[BlogPostForm] User from auth:', user?.id)
-        console.log('[BlogPostForm] Hardcoded user data:', isHardcodedUser)
         
         const { data: createdPost, error } = await (supabase
           .from('blog_posts') as any)

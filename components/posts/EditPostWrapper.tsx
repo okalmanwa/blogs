@@ -28,30 +28,13 @@ export function EditPostWrapper({ postId, returnTo }: EditPostWrapperProps) {
         const { data: { user } } = await supabase.auth.getUser()
         let userId: string | null = null
 
-        if (user) {
-          userId = user.id
-        } else {
-          // Check for hardcoded user cookie
-          const cookies = document.cookie.split(';')
-          const hardcodedCookie = cookies.find(c => c.trim().startsWith('hardcoded_user='))
-          if (hardcodedCookie) {
-            try {
-              const cookieValue = hardcodedCookie.split('=').slice(1).join('=')
-              const userData = JSON.parse(decodeURIComponent(cookieValue))
-              if (userData.id && !userData.id.startsWith('hardcoded-')) {
-                userId = userData.id
-              }
-            } catch (e) {
-              // Invalid cookie
-            }
-          }
-        }
-
-        if (!userId) {
+        if (!user) {
           setError('You must be logged in')
           setLoading(false)
           return
         }
+
+        const userId = user.id
 
         // Fetch post using browser client (has session, so RLS allows drafts)
         const { data: fetchedPost, error: postError } = await (supabase

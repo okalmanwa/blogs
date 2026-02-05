@@ -6,7 +6,6 @@ import { processImageUrls } from '@/lib/image-utils'
 import { Card } from '@/components/ui/Card'
 import { CommentsSection } from '@/components/blog/CommentsSection'
 import { PostActions } from '@/components/blog/PostActions'
-import { cookies } from 'next/headers'
 
 export default async function BlogPostPage({
   params,
@@ -29,18 +28,6 @@ export default async function BlogPostPage({
   // Get current user to check if they can edit/delete
   const { data: { user } } = await supabase.auth.getUser()
   
-  // Check for hardcoded user
-  const cookieStore = cookies()
-  const hardcodedUserCookie = cookieStore.get('hardcoded_user')
-  let hardcodedUser = null
-  if (hardcodedUserCookie) {
-    try {
-      hardcodedUser = JSON.parse(decodeURIComponent(hardcodedUserCookie.value))
-    } catch (e) {
-      // Invalid cookie
-    }
-  }
-
   // Determine current user ID and check if admin
   let currentUserId: string | null = null
   let isAdmin = false
@@ -54,9 +41,6 @@ export default async function BlogPostPage({
       .eq('id', user.id)
       .single() as { data: { role: string } | null }
     isAdmin = (profile as { role?: string } | null)?.role === 'admin'
-  } else if (hardcodedUser) {
-    currentUserId = hardcodedUser.id
-    isAdmin = hardcodedUser.role === 'admin'
   }
   
   // Pass admin status to PostActions - admins can edit/delete any post

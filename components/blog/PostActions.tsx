@@ -46,22 +46,6 @@ export function PostActions({ postId, postSlug, authorId, currentUserId }: PostA
           .eq('id', user.id)
           .single() as { data: { role: string } | null }
         isAdmin = (profile as { role?: string } | null)?.role === 'admin'
-      } else {
-        // Check for hardcoded user cookie
-        const cookies = document.cookie.split(';')
-        const hardcodedCookie = cookies.find(c => c.trim().startsWith('hardcoded_user='))
-        if (hardcodedCookie) {
-          try {
-            const cookieValue = hardcodedCookie.split('=').slice(1).join('=')
-            const userData = JSON.parse(decodeURIComponent(cookieValue))
-            if (userData.id && !userData.id.startsWith('hardcoded-')) {
-              userId = userData.id
-            }
-            isAdmin = userData.role === 'admin'
-          } catch (e) {
-            // Invalid cookie
-          }
-        }
       }
 
       // Check if user is the author OR admin

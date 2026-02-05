@@ -18,10 +18,7 @@ export function UserMenu({ user, profile }: UserMenuProps) {
   const supabase = createClient()
 
   const handleSignOut = async () => {
-    // Clear hardcoded user cookie
-    document.cookie = 'hardcoded_user=; path=/; max-age=0'
-    
-    // Sign out from Supabase if logged in
+    // Sign out from Supabase
     await supabase.auth.signOut()
     
     // Redirect

@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -13,27 +12,8 @@ export const revalidate = 0
 export default async function StudentDashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
-  // Check for hardcoded user
-  const cookieStore = cookies()
-  const hardcodedUserCookie = cookieStore.get('hardcoded_user')
-  let hardcodedUser = null
-  if (hardcodedUserCookie) {
-    try {
-      hardcodedUser = JSON.parse(decodeURIComponent(hardcodedUserCookie.value))
-    } catch (e) {
-      // Invalid cookie
-    }
-  }
 
-  if (!user && !hardcodedUser) {
-    redirect('/login')
-  }
-
-  // Get user ID - prioritize Supabase user, then hardcoded user ID
-  const userId = user?.id || (hardcodedUser?.id && !hardcodedUser.id.startsWith('hardcoded-') ? hardcodedUser.id : null)
-
-  if (!userId) {
+  if (!user) {
     redirect('/login')
   }
 

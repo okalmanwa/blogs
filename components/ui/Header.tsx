@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 import { UserMenu } from './UserMenu'
 import { SignOutButton } from './SignOutButton'
 import { NavLink } from './NavLink'
@@ -11,18 +10,6 @@ export async function Header() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
-  // Check for hardcoded user in cookies
-  const cookieStore = cookies()
-  const hardcodedUserCookie = cookieStore.get('hardcoded_user')
-  let hardcodedUser = null
-  if (hardcodedUserCookie) {
-    try {
-      hardcodedUser = JSON.parse(decodeURIComponent(hardcodedUserCookie.value))
-    } catch (e) {
-      // Invalid cookie
-    }
-  }
-  
   let profile = null
   if (user) {
     const { data } = await supabase
@@ -31,14 +18,6 @@ export async function Header() {
       .eq('id', user.id)
       .single()
     profile = data
-  } else if (hardcodedUser) {
-    // Use hardcoded user as profile
-    profile = {
-      id: hardcodedUser.id,
-      username: hardcodedUser.username,
-      full_name: hardcodedUser.email,
-      role: hardcodedUser.role,
-    }
   }
 
   return (
@@ -59,10 +38,10 @@ export async function Header() {
           </Link>
           
           <nav className="hidden md:flex items-center space-x-6 font-serif">
-            {(user && profile) || hardcodedUser ? (
+            {user && profile ? (
               <>
                 {/* Admin Navigation */}
-                {((profile || hardcodedUser)?.role === 'admin') ? (
+                {profile.role === 'admin' ? (
                   <>
                     <NavLink href="/admin/dashboard">Create Project</NavLink>
                     <NavLink href="/">Blogs</NavLink>
@@ -103,8 +82,8 @@ export async function Header() {
           {/* Mobile menu */}
           <div className="md:hidden flex-shrink-0 relative z-10">
             <MobileNav 
-              isAuthenticated={!!((user && profile) || hardcodedUser)}
-              isAdmin={((profile || hardcodedUser)?.role === 'admin')}
+              isAuthenticated={!!(user && profile)}
+              isAdmin={profile?.role === 'admin'}
             />
           </div>
         </div>
