@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
       .getPublicUrl(filePath)
 
     // Save to database
-    const { data, error: dbError } = await supabase
-      .from('gallery_images')
+    const { data, error: dbError } = await (supabase
+      .from('gallery_images') as any)
       .insert({
         url: publicUrl,
         title: title || null,
