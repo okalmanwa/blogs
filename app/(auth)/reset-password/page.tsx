@@ -14,20 +14,24 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null)
+  const [isInvitation, setIsInvitation] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
-    // Check if we have a valid password reset token
-    // Supabase password reset tokens come via hash fragments in the URL
+    // Check if we have a valid password reset or invitation token
+    // Supabase tokens come via hash fragments in the URL
     const checkToken = async () => {
       try {
-        // Check if there are hash fragments (password reset token)
+        // Check if there are hash fragments (password reset or invitation token)
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const type = hashParams.get('type')
         
-        if (accessToken && type === 'recovery') {
+        if (accessToken && (type === 'recovery' || type === 'invite')) {
+          // Track if this is an invitation
+          setIsInvitation(type === 'invite')
+          
           // Supabase automatically processes hash fragments and sets session
           // Wait a moment for Supabase to process the token
           await new Promise(resolve => setTimeout(resolve, 500))
@@ -181,8 +185,14 @@ export default function ResetPasswordPage() {
         <form onSubmit={handleSubmit} className="space-y-0">
           {/* Header */}
           <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Set New Password</h2>
-            <p className="text-xs text-gray-500">Enter your new password below</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">
+              {isInvitation ? 'Set Your Password' : 'Set New Password'}
+            </h2>
+            <p className="text-xs text-gray-500">
+              {isInvitation 
+                ? 'Welcome! Please set a password for your account' 
+                : 'Enter your new password below'}
+            </p>
           </div>
 
           <div className="px-4 sm:px-6 py-4 space-y-4">

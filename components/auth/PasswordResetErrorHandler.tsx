@@ -20,10 +20,26 @@ export function PasswordResetErrorHandler() {
       return
     }
 
-    // Check hash fragment for password reset errors
+    // Check hash fragment for password reset, invitation, or errors
     const hashParams = new URLSearchParams(window.location.hash.substring(1))
+    const accessToken = hashParams.get('access_token')
+    const type = hashParams.get('type')
     const hashError = hashParams.get('error')
     const hashErrorCode = hashParams.get('error_code')
+    
+    // Handle invitation links (type=invite with access_token in hash)
+    if (accessToken && type === 'invite') {
+      // Redirect to reset-password page which can handle invitation tokens
+      router.replace('/reset-password')
+      return
+    }
+    
+    // Handle password reset tokens in hash (type=recovery)
+    if (accessToken && type === 'recovery') {
+      // Redirect to reset-password page
+      router.replace('/reset-password')
+      return
+    }
     
     if (hashError && hashErrorCode) {
       // If it's an OTP/password reset error, redirect to forgot password page
