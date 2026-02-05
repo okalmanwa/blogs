@@ -3,14 +3,36 @@ import { BlogPostWithAuthor } from '@/types'
 import { SearchForm } from '@/components/blog/SearchForm'
 import { FilterSidebar } from '@/components/blog/FilterSidebar'
 import { BlogPostCard } from '@/components/blog/BlogPostCard'
+import { PasswordResetErrorHandler } from '@/components/auth/PasswordResetErrorHandler'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
+import { redirect } from 'next/navigation'
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { project?: string; search?: string; sort?: string; projectStatus?: string; page?: string }
+  searchParams: { project?: string; search?: string; sort?: string; projectStatus?: string; page?: string; code?: string; error?: string; error_code?: string; error_description?: string }
 }) {
+  // Handle password reset errors (expired/invalid links)
+  if (searchParams.error && searchParams.error_code) {
+    const errorCode = searchParams.error_code
+    const errorDescription = searchParams.error_description || searchParams.error
+    
+    // If it's an OTP/password reset error, redirect to forgot password page with error
+    if (errorCode === 'otp_expired' || errorCode === 'token_expired' || errorDescription?.includes('expired') || errorDescription?.includes('invalid')) {
+      const errorMsg = errorDescription?.replace(/\+/g, ' ') || 'Password reset link has expired. Please request a new one.'
+      redirect(`/forgot-password?error=${encodeURIComponent(errorMsg)}`)
+    }
+  }
+
+  // Handle password reset codes that redirect to homepage
+  // If we have a code parameter and no other search params (except type), it's likely a password reset
+  if (searchParams.code && !searchParams.project && !searchParams.search && !searchParams.sort && !searchParams.projectStatus && !searchParams.page && !searchParams.error) {
+    // Preserve type if already present, otherwise default to recovery
+    const type = searchParams.type || 'recovery'
+    redirect(`/auth/callback?code=${searchParams.code}&type=${type}&next=/reset-password`)
+  }
+
   const supabase = createClient()
   
   // Check if user is admin
@@ -126,6 +148,7 @@ export default async function HomePage({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <PasswordResetErrorHandler />
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-8 md:py-10">
         {/* Title at top - Mobile optimized */}
         <div className="mb-4 sm:mb-8">

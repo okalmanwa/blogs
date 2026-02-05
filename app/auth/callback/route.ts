@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const type = requestUrl.searchParams.get('type') // 'recovery' for password reset
   const next = requestUrl.searchParams.get('next') ?? '/'
 
   if (code) {
@@ -30,6 +31,23 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error) {
+      // If this is a password reset flow, redirect to reset password page
+      // Check type parameter or next parameter to detect recovery flow
+      if (type === 'recovery' || next === '/reset-password') {
+        const response = NextResponse.redirect(new URL('/reset-password', request.url))
+        // Ensure cookies are set
+        const allCookies = cookieStore.getAll()
+        allCookies.forEach((cookie) => {
+          response.cookies.set(cookie.name, cookie.value, {
+            httpOnly: cookie.name.includes('auth-token'),
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+          })
+        })
+        return response
+      }
+
       // Get user and profile to determine redirect
       const { data: { user } } = await supabase.auth.getUser()
       
