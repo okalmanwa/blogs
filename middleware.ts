@@ -85,8 +85,8 @@ export async function middleware(request: NextRequest) {
       }
     } else if (user) {
       try {
-        const { data: profile } = await supabase
-          .from('profiles')
+        const { data: profile } = await (supabase
+          .from('profiles') as any)
           .select('role')
           .eq('id', user.id)
           .single()
@@ -100,7 +100,8 @@ export async function middleware(request: NextRequest) {
           }
         }
       } catch (error) {
-        // Profile doesn't exist - redirect to student dashboard (default)
+        // Profile query failed - redirect to student dashboard for safety
+        console.warn('[Middleware] Admin route profile query failed:', error)
         return NextResponse.redirect(new URL('/student/dashboard', request.url))
       }
     }
@@ -116,8 +117,8 @@ export async function middleware(request: NextRequest) {
     } else if (user) {
       // Try to get profile, but don't block if it doesn't exist yet
       try {
-        const { data: profile } = await supabase
-          .from('profiles')
+        const { data: profile } = await (supabase
+          .from('profiles') as any)
           .select('role')
           .eq('id', user.id)
           .single()
