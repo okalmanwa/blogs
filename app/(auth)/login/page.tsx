@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -13,7 +13,20 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
+
+  // Handle password reset codes that redirect to login page
+  useEffect(() => {
+    const code = searchParams.get('code')
+    const type = searchParams.get('type')
+    const next = searchParams.get('next')
+    
+    // If we have a code with type=recovery or next=/reset-password, redirect to callback
+    if (code && (type === 'recovery' || next === '/reset-password')) {
+      router.replace(`/auth/callback?code=${code}&type=recovery&next=/reset-password`)
+    }
+  }, [searchParams, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,9 +173,14 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-medium text-gray-600 mb-1.5">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="password" className="block text-xs font-medium text-gray-600">
+                  Password
+                </label>
+                <Link href="/forgot-password" className="text-xs text-cornell-red hover:text-cornell-red/80 transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 id="password"
                 type="password"
