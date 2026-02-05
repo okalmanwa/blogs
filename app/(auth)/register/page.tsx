@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/Card'
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [username, setUsername] = useState('')
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState('')
@@ -25,6 +26,20 @@ export default function RegisterPage() {
     // Validate Cornell email
     if (!email.toLowerCase().endsWith('@cornell.edu')) {
       setError('Only Cornell University email addresses (@cornell.edu) are allowed')
+      setLoading(false)
+      return
+    }
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long')
       setLoading(false)
       return
     }
@@ -252,6 +267,23 @@ export default function RegisterPage() {
                 placeholder="Create a password"
               />
               <p className="mt-1.5 text-xs text-gray-500">Must be at least 6 characters</p>
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-xs font-medium text-gray-600 mb-1.5">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete="new-password"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cornell-red focus:border-cornell-red transition-all bg-white text-gray-900 placeholder-gray-400"
+                placeholder="Confirm your password"
+              />
             </div>
 
             <div className="pt-2">
