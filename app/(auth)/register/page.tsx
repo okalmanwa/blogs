@@ -136,15 +136,16 @@ export default function RegisterPage() {
             console.log('[Register] Profile created successfully:', existingProfile)
           }
         } else {
-          // Profile exists, but ensure role is 'student' if it's not set
+          // Profile exists, but ensure role is 'student' if it's not set (don't overwrite existing roles)
           const profile = existingProfile as { id: string; role?: string }
-          if (!profile.role || profile.role !== 'student') {
-            console.log('[Register] Updating profile role to student...')
+          if (!profile.role) {
+            console.log('[Register] Profile missing role, setting to student...')
             await (supabase
               .from('profiles') as any)
               .update({ role: 'student' })
               .eq('id', authData.user.id)
           }
+          // Don't overwrite existing roles - respect admin/viewer roles from database
         }
 
         // Refresh session to ensure cookies are set by browser client
