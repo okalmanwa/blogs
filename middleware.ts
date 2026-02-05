@@ -84,12 +84,12 @@ export async function middleware(request: NextRequest) {
         }
       }
     } catch (error) {
-      // Profile doesn't exist - redirect to student dashboard (default)
-      return NextResponse.redirect(new URL('/student/dashboard', request.url))
+      // Profile doesn't exist - redirect to registration
+      return NextResponse.redirect(new URL('/register', request.url))
     }
   }
 
-  // Protect student routes - block viewers
+  // Protect student routes - block viewers and require profile
   if (request.nextUrl.pathname.startsWith('/student')) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
@@ -102,15 +102,19 @@ export async function middleware(request: NextRequest) {
         .eq('id', user.id)
         .single()
 
-      // Only block if profile exists and role is viewer
-      // If profile doesn't exist, allow access (profile will be created)
-      if (profile && profile.role === 'viewer') {
+      // Profile must exist - if not, redirect to registration
+      if (!profile) {
+        return NextResponse.redirect(new URL('/register', request.url))
+      }
+
+      // Block viewers from student routes
+      if (profile.role === 'viewer') {
         return NextResponse.redirect(new URL('/', request.url))
       }
     } catch (error) {
-      // Profile doesn't exist or query failed - allow access
-      // The dashboard layout will handle creating the profile if needed
-      console.warn('Profile query failed in middleware, allowing access:', error)
+      // Profile doesn't exist or query failed - redirect to registration
+      console.warn('Profile query failed in middleware, redirecting to registration:', error)
+      return NextResponse.redirect(new URL('/register', request.url))
     }
   }
 

@@ -15,14 +15,19 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  // Get role from database
+  // Get role from database - profile must exist (created during registration)
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
     .single() as { data: { role: string } | null }
 
-  const userRole = profile?.role || 'student'
+  // If profile doesn't exist, user must register first
+  if (!profile) {
+    redirect('/register')
+  }
+
+  const userRole = profile.role
   const isAdmin = userRole === 'admin'
   const basePath = isAdmin ? '/admin' : '/student'
 

@@ -67,74 +67,38 @@ export default function LoginPage() {
         }
 
         // Get user profile from database to determine role
-        // The role in the database is the source of truth - NEVER overwrite existing roles
-        let { data: profile } = await supabase
+        // IMPORTANT: Only read the profile - NEVER create or update it here
+        // Profiles should only be created during registration
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('id, role')
           .eq('id', authData.user.id)
-          .single() as { data: { id: string; role: string | null } | null }
+          .single() as { data: { id: string; role: string | null } | null; error: any }
 
-        if (!profile) {
-          // Profile doesn't exist - create it automatically with default role 'student'
-          // Note: To set a user as admin, use the set-admin.js script or update the database directly
-          console.log('[Login] Profile not found, creating automatically with role "student"...')
-          const userEmail = authData.user.email || ''
-          const username = userEmail.split('@')[0] || 'user'
-          
-          const { error: profileError, data: newProfile } = await supabase
-            .from('profiles')
-            .insert({
-              id: authData.user.id,
-              username,
-              full_name: authData.user.user_metadata?.full_name || null,
-              role: 'student', // Default role - update via script or database if admin needed
-            } as any)
-            .select()
-            .single()
-
-          if (profileError) {
-            console.error('[Login] Failed to create profile:', profileError)
-            // Continue anyway - might be created by trigger
-            await new Promise(resolve => setTimeout(resolve, 500))
-            const { data: retryProfile } = await supabase
-              .from('profiles')
-              .select('id, role')
-              .eq('id', authData.user.id)
-              .single()
-            profile = (retryProfile as { id: string; role: string | null } | null) || null
-          } else {
-            profile = newProfile
-            console.log('[Login] Profile created automatically:', profile)
-          }
-        } else {
-          // Profile exists - check if role is missing (null, undefined, or empty string)
-          const profileRole = (profile as { role?: string | null }).role
-          if (!profileRole || profileRole.trim() === '') {
-            // Only update if role is truly missing - never overwrite existing roles
-            console.log('[Login] Profile exists but role is missing, setting to "student"...')
-            await (supabase.from('profiles') as any)
-              .update({ role: 'student' })
-              .eq('id', authData.user.id)
-            // Re-fetch to get updated profile
-            const { data: updatedProfile } = await supabase
-              .from('profiles')
-              .select('id, role')
-              .eq('id', authData.user.id)
-              .single()
-            profile = (updatedProfile as { id: string; role: string | null } | null) || null
-          } else {
-            // Role exists - respect it, never overwrite
-            console.log(`[Login] Profile exists with role: ${profileRole} - respecting database role`)
-          }
+        // If profile doesn't exist, user must register first
+        if (!profile || profileError) {
+          console.error('[Login] Profile not found - user must register first')
+          setError('No profile found. Please register first or contact support.')
+          setLoading(false)
+          // Sign out the user since they don't have a profile
+          await supabase.auth.signOut()
+          return
         }
 
-        // Determine redirect path based on role from database
-        // Role is the source of truth - update it in the database to change access
-        const profileRole = profile ? (profile as { role: string | null }).role : 'student'
-        let redirectPath = '/student/dashboard' // Default to student dashboard
+        // Profile exists - read the role from database (never modify it)
+        const profileRole = (profile as { role: string | null }).role
         
+        if (!profileRole) {
+          console.error('[Login] Profile exists but role is missing')
+          setError('Your profile is incomplete. Please contact support.')
+          setLoading(false)
+          return
+        }
+
         console.log(`[Login] User role from database: "${profileRole}"`)
-        console.log(`[Login] Profile data:`, profile)
+        
+        // Determine redirect path based on role from database
+        let redirectPath = '/student/dashboard' // Default to student dashboard
         
         if (profileRole === 'admin') {
           redirectPath = '/admin/dashboard'
