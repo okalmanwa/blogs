@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -22,11 +23,31 @@ export default function LoginPage() {
     const type = searchParams.get('type')
     const next = searchParams.get('next')
     
-    // If we have a code with type=recovery or next=/reset-password, redirect to callback
-    if (code && (type === 'recovery' || next === '/reset-password')) {
-      router.replace(`/auth/callback?code=${code}&type=recovery&next=/reset-password`)
+    // Decode next parameter if it's URL-encoded (searchParams.get should auto-decode, but be safe)
+    const decodedNext = next ? decodeURIComponent(next) : null
+    
+    // If we have a code with type=recovery OR next=/reset-password, redirect to callback
+    // This handles cases where Supabase sends recovery codes to login page
+    if (code && (type === 'recovery' || decodedNext === '/reset-password' || decodedNext?.includes('reset-password'))) {
+      setIsRedirecting(true)
+      // Use window.location for immediate redirect to avoid React hydration issues
+      window.location.href = `/auth/callback?code=${code}&type=recovery&next=/reset-password`
     }
-  }, [searchParams, router])
+  }, [searchParams])
+
+  // Show loading state while redirecting
+  if (isRedirecting) {
+    return (
+      <div className="w-full max-w-md mx-auto">
+        <Card className="border border-gray-200 shadow-sm">
+          <div className="px-4 sm:px-6 py-6 text-center">
+            <div className="animate-spin h-8 w-8 border-4 border-cornell-red border-t-transparent rounded-full mx-auto"></div>
+            <p className="mt-4 text-sm text-gray-600">Redirecting to password reset...</p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
