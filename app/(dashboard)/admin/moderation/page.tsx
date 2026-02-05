@@ -37,12 +37,12 @@ export default async function AdminModerationPage({
   if (hardcodedUser) {
     isAdmin = hardcodedUser.role === 'admin'
   } else if (user) {
-    const { data: profile } = await (supabase
-      .from('profiles') as any)
+    const { data: profile } = await supabase
+      .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
-    isAdmin = profile?.role === 'admin'
+      .single() as { data: { role: string } | null }
+    isAdmin = (profile as { role?: string } | null)?.role === 'admin'
   }
 
   if (!isAdmin) {

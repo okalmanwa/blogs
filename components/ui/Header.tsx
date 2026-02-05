@@ -25,8 +25,8 @@ export async function Header() {
   
   let profile = null
   if (user) {
-    const { data } = await (supabase
-      .from('profiles') as any)
+    const { data } = await supabase
+      .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
@@ -40,9 +40,6 @@ export async function Header() {
       role: hardcodedUser.role,
     }
   }
-  
-  // Determine if user is admin
-  const isAdmin = profile?.role === 'admin' || hardcodedUser?.role === 'admin'
 
   return (
     <header className="bg-white border-b border-cornell-red/60 sm:border-b-2 sm:border-cornell-red sticky top-0 z-50 relative">
@@ -65,7 +62,7 @@ export async function Header() {
             {(user && profile) || hardcodedUser ? (
               <>
                 {/* Admin Navigation */}
-                {isAdmin ? (
+                {((profile || hardcodedUser)?.role === 'admin') ? (
                   <>
                     <NavLink href="/admin/dashboard">Create Project</NavLink>
                     <NavLink href="/">Blogs</NavLink>
@@ -107,7 +104,7 @@ export async function Header() {
           <div className="md:hidden flex-shrink-0 relative z-10">
             <MobileNav 
               isAuthenticated={!!((user && profile) || hardcodedUser)}
-              isAdmin={isAdmin}
+              isAdmin={((profile || hardcodedUser)?.role === 'admin')}
             />
           </div>
         </div>

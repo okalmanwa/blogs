@@ -12,13 +12,13 @@ export default async function AdminUsersPage() {
     redirect('/login')
   }
 
-  const { data: profile } = await (supabase
-    .from('profiles') as any)
+  const { data: profile } = await supabase
+    .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .single() as { data: { role: string } | null }
 
-  if (profile?.role !== 'admin') {
+  if ((profile as { role?: string } | null)?.role !== 'admin') {
     redirect('/student/dashboard')
   }
 
