@@ -24,57 +24,64 @@ async function setupHardcodedUsers() {
 
   for (const [role, userData] of Object.entries(HARDCODED_USERS)) {
     try {
-      // Check if user already exists
-      const { data: existingUser } = await supabase.auth.admin.getUserByEmail(userData.email)
+      // Try to create the user first
+      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+        email: userData.email,
+        password: userData.password,
+        email_confirm: true,
+      })
 
-      if (existingUser?.user) {
-        console.log(`User ${userData.email} already exists, updating...`)
-        
-        // Update password
-        await supabase.auth.admin.updateUserById(existingUser.user.id, {
-          password: userData.password,
-        })
+      if (createError) {
+        // If user already exists, try to find and update them
+        if (createError.message?.includes('already registered') || createError.message?.includes('already exists')) {
+          console.log(`User ${userData.email} already exists, finding and updating...`)
+          
+          // List users and find by email
+          const { data: usersData } = await supabase.auth.admin.listUsers()
+          const existingUser = usersData?.users?.find((u: any) => u.email === userData.email)
 
-        // Update profile
-        await supabase
+          if (existingUser) {
+            // Update password
+            await supabase.auth.admin.updateUserById(existingUser.id, {
+              password: userData.password,
+            })
+
+            // Update profile
+            await supabase
+              .from('profiles')
+              .upsert({
+                id: existingUser.id,
+                username: userData.username,
+                full_name: userData.full_name,
+                role: userData.role,
+              })
+
+            console.log(`✓ Updated ${role} user: ${userData.email}`)
+          } else {
+            console.error(`Could not find existing user ${userData.email} to update`)
+          }
+        } else {
+          console.error(`Error creating ${role} user:`, createError)
+        }
+        continue
+      }
+
+      // User was created successfully
+      if (newUser.user) {
+        // Create profile
+        const { error: profileError } = await supabase
           .from('profiles')
-          .upsert({
-            id: existingUser.user.id,
+          .insert({
+            id: newUser.user.id,
             username: userData.username,
             full_name: userData.full_name,
             role: userData.role,
           })
 
-        console.log(`✓ Updated ${role} user: ${userData.email}`)
-      } else {
-        // Create new user
-        const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-          email: userData.email,
-          password: userData.password,
-          email_confirm: true,
-        })
-
-        if (createError) {
-          console.error(`Error creating ${role} user:`, createError)
-          continue
-        }
-
-        if (newUser.user) {
-          // Create profile
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: newUser.user.id,
-              username: userData.username,
-              full_name: userData.full_name,
-              role: userData.role,
-            })
-
-          if (profileError) {
-            console.error(`Error creating profile for ${role}:`, profileError)
-          } else {
-            console.log(`✓ Created ${role} user: ${userData.email}`)
-          }
+        if (profileError) {
+          console.error(`Error creating profile for ${role}:`, profileError)
+        } else {
+          console.log(`✓ Created ${role} user: ${userData.email}`)
         }
       }
     } catch (error) {
