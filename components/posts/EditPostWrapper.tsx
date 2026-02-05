@@ -26,7 +26,6 @@ export function EditPostWrapper({ postId, returnTo }: EditPostWrapperProps) {
 
         // Get user ID to verify ownership
         const { data: { user } } = await supabase.auth.getUser()
-        let userId: string | null = null
 
         if (!user) {
           setError('You must be logged in')
