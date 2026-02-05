@@ -33,12 +33,12 @@ export default async function DashboardLayout({
   if (hardcodedUser) {
     userRole = hardcodedUser.role
   } else if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
+    const { data: profile } = await (supabase
+      .from('profiles') as any)
       .select('role')
       .eq('id', user.id)
-      .single() as { data: { role: string } | null }
-    userRole = (profile as { role?: string } | null)?.role || 'student'
+      .single()
+    userRole = profile?.role || 'student'
   }
 
   const isAdmin = userRole === 'admin'

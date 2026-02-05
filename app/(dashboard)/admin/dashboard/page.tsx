@@ -34,12 +34,12 @@ export default async function AdminDashboardPage() {
   if (hardcodedUser) {
     isAdmin = hardcodedUser.role === 'admin'
   } else if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
+    const { data: profile } = await (supabase
+      .from('profiles') as any)
       .select('role')
       .eq('id', user.id)
-      .single() as { data: { role: string } | null }
-    isAdmin = (profile as { role?: string } | null)?.role === 'admin'
+      .single()
+    isAdmin = profile?.role === 'admin'
   }
 
   if (!isAdmin) {
