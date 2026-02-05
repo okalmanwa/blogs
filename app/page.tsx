@@ -11,7 +11,7 @@ import { redirect } from 'next/navigation'
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { project?: string; search?: string; sort?: string; projectStatus?: string; page?: string; code?: string; error?: string; error_code?: string; error_description?: string }
+  searchParams: { project?: string; search?: string; sort?: string; projectStatus?: string; page?: string; code?: string; error?: string; error_code?: string; error_description?: string; type?: string }
 }) {
   // Handle password reset errors (expired/invalid links)
   if (searchParams.error && searchParams.error_code) {
